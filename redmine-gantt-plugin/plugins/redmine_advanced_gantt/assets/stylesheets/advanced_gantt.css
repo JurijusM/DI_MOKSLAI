@@ -122,7 +122,8 @@
 .task-list-header {
   flex-shrink: 0;
   background-color: #f5f5f5;
-  border-bottom: 2px solid #ddd;
+  margin: 0;
+  padding: 0;
 }
 
 .task-list-table-header {
@@ -132,16 +133,19 @@
 }
 
 .task-list-table-header th {
-  padding: 12px 8px;
+  padding: 4px 8px;
   text-align: left;
   font-weight: 600;
   font-size: 13px;
   border-right: 1px solid #ddd;
+  border-bottom: 1px solid #ddd;
   position: relative;
   white-space: normal;
   word-wrap: break-word;
   vertical-align: middle;
   line-height: 1.2;
+  height: 48px;
+  box-sizing: border-box;
 }
 
 .task-list-table-header th:last-child {
