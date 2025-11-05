@@ -1,0 +1,16 @@
+IMPORTANT: Stop Streamlit before recreating database
+
+1. Go to the terminal where Streamlit is running
+2. Press Ctrl+C to stop it
+3. Then run database recreation commands
+
+
+
+
+
+
+
+
+
+
+

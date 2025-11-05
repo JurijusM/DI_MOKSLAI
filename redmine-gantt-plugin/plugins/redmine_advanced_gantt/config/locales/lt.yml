@@ -1,0 +1,16 @@
+lt:
+  advanced_gantt_title: "Pažangus Gantt Grafikas"
+  button_today: "Šiandien"
+  button_expand_all: "Išskleisti Visus"
+  button_collapse_all: "Suskleisti Visus"
+  button_refresh: "Atnaujinti"
+  zoom_day: "Diena"
+  zoom_week: "Savaitė"
+  zoom_month: "Mėnuo"
+  zoom_year: "Metai"
+  label_task_name: "Užduoties Pavadinimas"
+  label_duration: "Trukmė"
+  label_start_date: "Pradžios Data"
+  label_due_date: "Pabaigos Data"
+
+

@@ -1,0 +1,83 @@
+<% content_for :header_tags do %>
+  <%= stylesheet_link_tag 'advanced_gantt', plugin: 'redmine_advanced_gantt' %>
+  <%= stylesheet_link_tag 'custom_gantt', plugin: 'redmine_advanced_gantt' %>
+  <%= javascript_include_tag 'custom_gantt', plugin: 'redmine_advanced_gantt' %>
+<% end %>
+
+<div class="contextual">
+  <%= link_to l(:button_refresh), {}, class: 'icon icon-reload', onclick: 'location.reload(); return false;' %>
+</div>
+
+<h2><%= l(:advanced_gantt_title) %></h2>
+
+<div class="gantt-toolbar">
+  <div class="gantt-toolbar-left">
+    <button id="today-btn" class="gantt-btn"><%= l(:button_today) %></button>
+    <button id="expand-all-btn" class="gantt-btn"><%= l(:button_expand_all) %></button>
+    <button id="collapse-all-btn" class="gantt-btn"><%= l(:button_collapse_all) %></button>
+  </div>
+  <div class="gantt-toolbar-right">
+    <div class="zoom-controls">
+      <button class="zoom-btn" data-zoom="Day"><%= l(:zoom_day) %></button>
+      <button class="zoom-btn active" data-zoom="Week"><%= l(:zoom_week) %></button>
+      <button class="zoom-btn" data-zoom="Month"><%= l(:zoom_month) %></button>
+      <button class="zoom-btn" data-zoom="Year"><%= l(:zoom_year) %></button>
+    </div>
+  </div>
+</div>
+
+<div class="gantt-split-container">
+  <div class="gantt-task-list-panel" id="gantt-task-list-panel">
+    <div class="task-list-header">
+      <table class="task-list-table-header">
+        <thead>
+          <tr>
+            <th class="task-name-col">
+              <%= l(:label_task_name) %>
+              <div class="column-resizer-handle" data-column="task-name"></div>
+            </th>
+            <th class="task-duration-col">
+              <%= l(:label_duration) %>
+              <div class="column-resizer-handle" data-column="task-duration"></div>
+            </th>
+            <th class="task-start-col">
+              <%= l(:label_start_date) %>
+              <div class="column-resizer-handle" data-column="task-start"></div>
+            </th>
+            <th class="task-due-col">
+              <%= l(:label_due_date) %>
+              <div class="column-resizer-handle" data-column="task-due"></div>
+            </th>
+          </tr>
+        </thead>
+      </table>
+    </div>
+    <div class="task-list-body" id="task-list-body">
+      <!-- Task list will be populated by JavaScript -->
+    </div>
+  </div>
+  
+  <div class="gantt-resizer" id="gantt-resizer">
+    <div class="gantt-resizer-handle"></div>
+  </div>
+  
+  <div class="gantt-chart-panel" id="gantt-chart-panel">
+    <div id="gantt-container" data-project-id="<%= @project.id %>">
+      <!-- Gantt chart will be rendered here -->
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const projectId = document.getElementById('gantt-container').getAttribute('data-project-id');
+    const ganttData = <%= raw @gantt_data.to_json %>;
+    
+    if (typeof initializeCustomGantt === 'function') {
+      initializeCustomGantt(projectId, ganttData);
+    } else {
+      console.error('❌ initializeCustomGantt function not found');
+    }
+  });
+</script>
+

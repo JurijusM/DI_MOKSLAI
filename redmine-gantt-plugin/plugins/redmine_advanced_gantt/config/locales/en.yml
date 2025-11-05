@@ -1,0 +1,16 @@
+en:
+  advanced_gantt_title: "Advanced Gantt Chart"
+  button_today: "Today"
+  button_expand_all: "Expand All"
+  button_collapse_all: "Collapse All"
+  button_refresh: "Refresh"
+  zoom_day: "Day"
+  zoom_week: "Week"
+  zoom_month: "Month"
+  zoom_year: "Year"
+  label_task_name: "Task Name"
+  label_duration: "Duration"
+  label_start_date: "Start Date"
+  label_due_date: "Due Date"
+
+

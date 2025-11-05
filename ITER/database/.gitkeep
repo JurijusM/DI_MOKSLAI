@@ -1,0 +1,7 @@
+# Database files will be stored here
+# SQLite database: iter.db
+# SQL schema: schema.sql
+# Initialization: init_db.py
+
+
+

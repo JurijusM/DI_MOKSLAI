@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: redmine_gantt_db
+    environment:
+      POSTGRES_DB: redmine_development
+      POSTGRES_USER: redmine
+      POSTGRES_PASSWORD: redmine_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U redmine"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redmine:
+    image: redmine:5.1-alpine
+    container_name: redmine_gantt_app
+    environment:
+      REDMINE_DB_POSTGRES: db
+      REDMINE_DB_DATABASE: redmine_development
+      REDMINE_DB_USERNAME: redmine
+      REDMINE_DB_PASSWORD: redmine_password
+      REDMINE_SECRET_KEY_BASE: supersecretkey123456789012345678901234567890
+    ports:
+      - "3000:3000"
+    volumes:
+      - redmine_files:/usr/src/redmine/files
+      - ./plugins/redmine_advanced_gantt:/usr/src/redmine/plugins/redmine_advanced_gantt
+      - ./logs:/usr/src/redmine/log
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  redmine_files:
+
+

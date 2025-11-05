@@ -1,0 +1,55 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+venv2/
+ENV/
+env/
+*.egg-info/
+dist/
+build/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+*.ipynb_checkpoints
+
+# Database
+*.sqlite3
+*.db
+chroma.sqlite3
+vector-db/
+embeddings/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Temporary files
+*.tmp
+~$*.xlsx
+~$*.docx
+*.bak
+
+# Docker
+docker-compose.override.yml
+
+# Logs
+*.log
+logs/
+
+# Node modules (if any)
+node_modules/
+
+# Redmine specific
+redmine-gantt-plugin/plugins/redmine_advanced_gantt/assets/javascripts/frappe-gantt.min.js
