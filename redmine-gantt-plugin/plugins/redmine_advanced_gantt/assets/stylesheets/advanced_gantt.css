@@ -231,6 +231,35 @@
   white-space: nowrap !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
+  display: inline-block;
+  max-width: calc(100% - 25px);
+}
+
+.task-external-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 6px;
+  opacity: 0;
+  transition: opacity 0.2s, color 0.2s;
+  color: #999;
+  text-decoration: none;
+  vertical-align: middle;
+}
+
+.task-list-table tbody tr:hover .task-external-link {
+  opacity: 1;
+}
+
+.task-external-link:hover {
+  color: #2196F3;
+  transform: scale(1.1);
+}
+
+.task-external-link svg {
+  width: 14px;
+  height: 14px;
+  vertical-align: middle;
 }
 
 .task-duration-cell {
