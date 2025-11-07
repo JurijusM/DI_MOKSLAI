@@ -1,12 +1,53 @@
-<div class="resource-planner">
+<div class="resource-planner" data-csrf-token="<%= form_authenticity_token %>" data-assign-url="<%= project_resource_planner_assign_path(@project) %>">
   <h2><%= l(:resource_planner_title) %></h2>
+
+  <div class="resource-planner__flash is-hidden" role="alert" aria-live="polite"></div>
 
   <div class="resource-planner__summary">
     <h3><%= l(:resource_planner_members_heading) %></h3>
     <% if @users.any? %>
       <ul>
         <% @users.each do |user| %>
-          <li><%= link_to user.name, user_path(user) %></li>
+          <li>
+            <%= link_to user.name, user_path(user) %>
+            <% capacity_hours = resource_capacity_hours(user, @capacities || {}) %>
+            <% if User.current.allowed_to?(:manage_resource_planner_capacities, @project) %>
+              <%= form_with url: project_resource_planner_capacity_path(@project), method: :patch, local: true,
+                            html: {
+                              class: 'resource-planner__capacity-form',
+                              data: {
+                                user_id: user.id,
+                                saving_text: l(:resource_planner_capacity_saving),
+                                saved_text: l(:resource_planner_capacity_saved),
+                                error_text: l(:resource_planner_capacity_error_short)
+                              }
+                            } do %>
+                <%= hidden_field_tag :user_id, user.id %>
+                <label class="resource-planner__capacity-label">
+                  <span class="label-text"><%= l(:resource_planner_capacity_label) %></span>
+                  <%= number_field_tag :hours_per_week, capacity_hours,
+                        in: 0..168,
+                        step: 0.5,
+                        class: 'resource-planner__capacity-input' %>
+                  <span class="unit">h/week</span>
+                </label>
+                <button type="submit" class="resource-planner__capacity-save" title="<%= l(:button_save) %>">
+                  <span class="icon">💾</span>
+                </button>
+                <button type="button" class="resource-planner__capacity-reset" title="<%= l(:resource_planner_capacity_reset) %>"
+                        data-default-hours="<%= ResourcePlannerCapacity.default_hours %>">↺</button>
+                <span class="resource-planner__capacity-status" aria-live="polite"></span>
+              <% end %>
+            <% else %>
+              <span class="resource-planner__capacity-label readonly">
+                <span class="label-text"><%= l(:resource_planner_capacity_label) %></span>
+                <span class="resource-planner__capacity-value"><%= format('%.1f', capacity_hours) %> h/week</span>
+              </span>
+            <% end %>
+            <% if @assignable_users.include?(user) %>
+              <span class="resource-planner__assignable-badge"><%= l(:resource_planner_assignable_badge) %></span>
+            <% end %>
+          </li>
         <% end %>
       </ul>
     <% else %>
@@ -17,69 +58,172 @@
   <div class="resource-planner__unassigned">
     <h3><%= l(:resource_planner_unassigned_heading) %></h3>
     <% if @unassigned_issues.any? %>
-      <ul>
-        <% @unassigned_issues.each do |issue| %>
-          <li>
-            <%= link_to "##{issue.id} #{issue.subject}", issue_path(issue) %>
-            <% if issue.estimated_hours.present? %>
-              <span class="resource-planner__estimate">(<%= issue.estimated_hours %>h)</span>
+      <% @unassigned_by_tracker.each do |tracker, issues| %>
+        <div class="resource-planner__unassigned-group">
+          <h4><%= tracker ? tracker.name : l(:resource_planner_unassigned_other_tracker) %></h4>
+          <ul>
+            <% issues.each do |issue| %>
+              <li class="resource-planner__unassigned-item" data-issue-id="<%= issue.id %>">
+                <%= link_to "##{issue.id} #{issue.subject}", issue_path(issue) %>
+                <span class="resource-planner__meta">
+                  <% if issue.estimated_hours.present? %>
+                    <span class="meta-item"><%= format('%.1f', issue.estimated_hours) %>h</span>
+                  <% end %>
+                  <% if issue.start_date.present? || issue.due_date.present? %>
+                    <span class="meta-item">
+                      <%= [issue.start_date, issue.due_date].compact.map { |date| format_date(date) }.join(' -> ') %>
+                    </span>
+                  <% end %>
+                  <% if issue.project.present? && issue.project != @project %>
+                    <span class="meta-item"><%= issue.project.name %></span>
+                  <% end %>
+                </span>
+                <% if @assignable_users.any? %>
+                  <%= form_with url: project_resource_planner_assign_path(@project), method: :post, local: true, html: { class: 'resource-planner__inline-form' } do |f| %>
+                    <%= hidden_field_tag :issue_id, issue.id %>
+                    <%= select_tag :user_id,
+                          options_from_collection_for_select(@assignable_users, :id, :name),
+                          include_blank: l(:label_select_none),
+                          class: 'resource-planner__inline-select' %>
+                    <%= submit_tag l(:resource_planner_assign_submit), class: 'resource-planner__assign-button' %>
+                  <% end %>
+                <% end %>
+              </li>
             <% end %>
-          </li>
-        <% end %>
-      </ul>
+          </ul>
+        </div>
+      <% end %>
     <% else %>
       <p class="resource-planner__empty"><%= l(:resource_planner_no_unassigned) %></p>
     <% end %>
   </div>
 
-  <div class="resource-planner__grid">
-    <table>
-      <thead>
-        <tr>
-          <th><%= l(:label_user) %></th>
-          <% @weeks.each do |week_start| %>
-            <th>
-              <div class="week-label">
-                <span class="week-range">
-                  <%= l(:label_week) %> <%= week_start.cweek %>
-                </span>
-                <span class="week-dates">
-                  <%= week_start.strftime('%b %d') %> - <%= (week_start + 6).strftime('%b %d') %>
-                </span>
-              </div>
-            </th>
-          <% end %>
-        </tr>
-      </thead>
-      <tbody>
-        <% if @resource_rows.any? %>
-          <% @resource_rows.each do |row| %>
-            <tr>
-              <th scope="row"><%= link_to row[:user].name, user_path(row[:user]) %></th>
-              <% row[:cells].each do |cell| %>
-                <% hours = cell[:hours] %>
-                <td class="resource-cell <%= resource_load_class(hours) %>">
-                  <span class="hours"><%= format('%.1f', hours) %>h</span>
-                  <% if cell[:issue_count].positive? %>
-                    <span class="issues"><%= cell[:issue_count] %> <%= l(:label_issue_plural) %></span>
-                  <% end %>
-                </td>
+  <div class="resource-grid" style="--week-count: <%= @weeks.size %>">
+    <div class="resource-grid__header-row">
+      <div class="resource-grid__summary-header"><%= l(:label_user) %></div>
+      <div class="resource-grid__week-headers">
+        <% @weeks.each do |week| %>
+          <div class="resource-grid__week-header <%= 'is-current' if week[:current] %>">
+            <div class="week-label">
+              <span class="week-range"><%= l(:resource_planner_week_number, number: week[:number]) %></span>
+              <span class="week-dates"><%= format_date(week[:start]) %> - <%= format_date(week[:end]) %></span>
+              <% if week[:current] %>
+                <span class="week-badge"><%= l(:resource_planner_current_week_badge) %></span>
               <% end %>
-            </tr>
-          <% end %>
-        <% else %>
-          <tr>
-            <td colspan="<%= @weeks.size + 1 %>" class="resource-planner__empty">
-              <%= l(:resource_planner_no_assignments) %>
-            </td>
-          </tr>
+            </div>
+          </div>
         <% end %>
-      </tbody>
-    </table>
+      </div>
+    </div>
+
+    <% @resource_rows.each do |row| %>
+      <div class="resource-grid__resource" data-user-id="<%= row[:user].id %>">
+        <div class="resource-grid__summary">
+          <div class="summary-header">
+            <button type="button"
+                    class="resource-planner__toggle-tasks"
+                    data-user-id="<%= row[:user].id %>"
+                    aria-expanded="false"
+                    aria-controls="resource-tasks-<%= row[:user].id %>"
+                    onclick="ResourcePlannerToggle(this)">
+              <span class="toggle-icon">+</span>
+              <span class="sr-only"><%= l(:resource_planner_toggle_tasks) %></span>
+            </button>
+            <div class="summary-content">
+              <%= link_to row[:user].name, user_path(row[:user]) %>
+              <span class="resource-planner__capacity-label"><%= format('%.1f', row[:capacity_hours]) %>h/week</span>
+            </div>
+          </div>
+
+          <div class="resource-grid__tasks-panel" id="resource-tasks-<%= row[:user].id %>">
+            <% if row[:tasks].any? %>
+              <% row[:tasks].each do |task| %>
+                <div class="tasks-panel__item">
+                  <div class="task-summary">
+                    <span class="task-name"><%= link_to "##{task[:issue].id} #{task[:issue].subject}", issue_path(task[:issue]) %></span>
+                    <span class="task-dates"><%= [task[:start_date], task[:due_date]].compact.map { |date| format_date(date) }.join(' → ') %></span>
+                    <% if task[:estimated_hours].present? %>
+                      <span class="task-estimate"><%= format('%.1f', task[:estimated_hours]) %>h</span>
+                    <% end %>
+                  </div>
+                  <div class="task-weekly">
+                    <% shown = false %>
+                    <% task[:weekly_hours].each_with_index do |hours, week_index| %>
+                      <% next if hours.zero? %>
+                      <% shown = true %>
+                      <span class="task-week" title="<%= "#{format_date(@weeks[week_index][:start])} - #{format_date(@weeks[week_index][:end])}" %>">
+                        W<%= @weeks[week_index][:number] %>: <%= format('%.1f', hours) %>h
+                      </span>
+                    <% end %>
+                    <% unless shown %>
+                      <span class="task-week is-empty"><%= l(:resource_planner_no_work_scheduled) %></span>
+                    <% end %>
+                  </div>
+                </div>
+              <% end %>
+            <% else %>
+              <p class="resource-planner__no-tasks"><%= l(:resource_planner_no_tasks) %></p>
+            <% end %>
+          </div>
+        </div>
+
+        <div class="resource-grid__timeline" style="--week-count: <%= @weeks.size %>">
+          <div class="resource-grid__week-track">
+            <% row[:cells].each_with_index do |cell, index| %>
+              <% week = @weeks[index] %>
+              <% hours = cell[:hours] %>
+              <% capacity_hours = cell[:capacity_hours] || row[:capacity_hours] %>
+              <% utilisation_percent = resource_utilisation_percent(cell[:utilisation]) %>
+              <div class="week-cell <%= resource_load_class(hours, capacity_hours) %> <%= 'is-current' if week[:current] %>" aria-label="Week <%= week[:number] %>: <%= format('%.1f', hours) %>h">
+                <strong><%= format('%.1f', hours) %>h</strong>
+                <% if utilisation_percent %>
+                  <span><%= l(:resource_planner_utilisation_label, percent: utilisation_percent) %></span>
+                <% else %>
+                  <span class="is-missing"><%= l(:resource_planner_capacity_missing_label) %></span>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+
+          <div class="resource-grid__task-bars" aria-hidden="true">
+            <% row[:tasks].each do |task| %>
+              <div class="task-bar"
+                   style="left: <%= task[:gantt_start_percent] %>%; width: <%= task[:gantt_width_percent] %>%">
+                <span class="task-bar__label"><%= format('%.1f', task[:total_hours]) %>h • <%= task[:issue].subject %></span>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    <% end %>
   </div>
 
   <p class="resource-planner__placeholder">
     <%= l(:resource_planner_placeholder) %>
   </p>
 </div>
+
+<script>
+  if (!window.ResourcePlannerToggle) {
+    window.ResourcePlannerToggle = function (button) {
+      try {
+        var userId = button.getAttribute('data-user-id');
+        var panel = document.getElementById('resource-tasks-' + userId);
+        if (!panel) { return; }
+        var row = button.closest('.resource-grid__resource');
+        var bars = row ? row.querySelector('.resource-grid__task-bars') : null;
+        var isVisible = panel.classList.toggle('is-visible');
+        if (bars) {
+          bars.classList.toggle('is-visible', isVisible);
+        }
+        button.classList.toggle('is-expanded', isVisible);
+        button.setAttribute('aria-expanded', isVisible ? 'true' : 'false');
+        var icon = button.querySelector('.toggle-icon');
+        if (icon) { icon.textContent = isVisible ? '-' : '+'; }
+      } catch (e) {
+        console.error('ResourcePlannerToggle error', e);
+      }
+    };
+  }
+</script>
 
