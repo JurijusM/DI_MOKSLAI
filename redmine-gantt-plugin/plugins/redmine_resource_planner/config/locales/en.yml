@@ -1,0 +1,10 @@
+en:
+  label_resource_planner: "Resources"
+  resource_planner_title: "Resource Planner"
+  resource_planner_members_heading: "Members"
+  resource_planner_no_members: "No members yet. Add people to this project to plan their workload."
+  resource_planner_unassigned_heading: "Open issues without assignee"
+  resource_planner_no_unassigned: "All open issues are assigned."
+  resource_planner_placeholder: "This is a placeholder view. Detailed weekly capacity charts and drag-and-drop assignment will be implemented in upcoming iterations."
+  resource_planner_no_assignments: "No assignments found for the selected period."
+

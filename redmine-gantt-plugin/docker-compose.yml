@@ -31,7 +31,7 @@ services:
       - "3000:3000"
     volumes:
       - redmine_files:/usr/src/redmine/files
-      - ./plugins/redmine_advanced_gantt:/usr/src/redmine/plugins/redmine_advanced_gantt
+      - ./plugins:/usr/src/redmine/plugins
       - ./logs:/usr/src/redmine/log
     depends_on:
       db:

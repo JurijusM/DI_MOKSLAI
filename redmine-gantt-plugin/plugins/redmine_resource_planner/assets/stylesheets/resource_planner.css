@@ -1,0 +1,113 @@
+.resource-planner {
+  background-color: #fff;
+  padding: 16px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+}
+
+.resource-planner h2 {
+  margin-bottom: 12px;
+}
+
+.resource-planner__summary,
+.resource-planner__unassigned {
+  margin-bottom: 16px;
+}
+
+.resource-planner__empty {
+  color: #999;
+  font-style: italic;
+  margin: 4px 0 0 0;
+}
+
+.resource-planner__placeholder {
+  font-style: italic;
+  color: #777;
+}
+
+.resource-planner__grid {
+  margin: 24px 0;
+  overflow-x: auto;
+}
+
+.resource-planner__grid table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 800px;
+}
+
+.resource-planner__grid th,
+.resource-planner__grid td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: center;
+  background-color: #fff;
+}
+
+.resource-planner__grid th {
+  background-color: #f5f5f5;
+  font-weight: 600;
+}
+
+.resource-planner__grid th[scope="row"] {
+  text-align: left;
+  white-space: nowrap;
+}
+
+.week-label {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 12px;
+}
+
+.week-label .week-range {
+  font-weight: 600;
+  color: #333;
+}
+
+.week-label .week-dates {
+  color: #666;
+}
+
+.resource-cell {
+  position: relative;
+  min-width: 96px;
+  height: 64px;
+  vertical-align: middle;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.resource-cell .hours {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #222;
+}
+
+.resource-cell .issues {
+  display: block;
+  font-size: 11px;
+  color: #555;
+}
+
+.resource-cell--empty {
+  background-color: #fafafa;
+  color: #bbb;
+}
+
+.resource-cell--light {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+.resource-cell--medium {
+  background-color: #fff3e0;
+  color: #ef6c00;
+}
+
+.resource-cell--heavy {
+  background-color: #ffebee;
+  color: #c62828;
+}
+
