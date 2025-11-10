@@ -1,0 +1,39 @@
+﻿<div class="agile-board" data-project-id="<%= @project.id %>">
+  <header class="agile-board__header">
+    <h2><%= l(:label_agile_board_title, project: @project.name) %></h2>
+    <div class="agile-board__filters">
+      <label for="agile-board-assignee"><%= l(:label_assigned_to) %></label>
+      <%= select_tag :assignee_id,
+                     options_from_collection_for_select(@project.users, :id, :name, User.current.id),
+                     include_blank: l(:label_all),
+                     id: "agile-board-assignee" %>
+    </div>
+  </header>
+
+  <section class="agile-board__columns">
+    <% @columns.each do |column| %>
+      <div class="agile-board__column" data-column-id="<%= column.id %>">
+        <h3><%= column.name %></h3>
+        <ul class="agile-board__cards">
+          <% Array.wrap(@issues_by_column[column.id]).each do |issue| %>
+            <li class="agile-board__card" data-issue-id="<%= issue.id %>" draggable="true">
+              <div class="agile-board__card-header">
+                <span class="agile-board__card-tracker"><%= issue.tracker %></span>
+                <span class="agile-board__card-status"><%= issue.status %></span>
+              </div>
+              <div class="agile-board__card-title"><%= link_to_issue(issue) %></div>
+              <div class="agile-board__card-meta">
+                <% if issue.assigned_to %>
+                  <span class="agile-board__card-assignee"><%= avatar(issue.assigned_to, size: "16") %> <%= issue.assigned_to %></span>
+                <% end %>
+                <span class="agile-board__card-estimate">
+                  <%= issue.estimated_hours ? format_hours(issue.estimated_hours) : l(:label_no_estimate) %>
+                </span>
+              </div>
+            </li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+  </section>
+</div>

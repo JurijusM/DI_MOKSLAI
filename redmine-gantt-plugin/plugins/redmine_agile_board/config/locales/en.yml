@@ -1,0 +1,7 @@
+﻿en:
+  label_agile_board: "Agile board"
+  label_agile_board_title: "Agile board â€“ %{project}"
+  label_agile_board_backlog: "Backlog"
+  label_agile_board_in_progress: "In progress"
+  label_agile_board_done: "Done"
+  label_no_estimate: "No estimate"

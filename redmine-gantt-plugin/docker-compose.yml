@@ -32,6 +32,7 @@ services:
     volumes:
       - redmine_files:/usr/src/redmine/files
       - ./plugins:/usr/src/redmine/plugins
+      - ./public/plugin_assets:/usr/src/redmine/public/plugin_assets
       - ./logs:/usr/src/redmine/log
     depends_on:
       db:

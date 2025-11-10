@@ -10,6 +10,8 @@ Redmine::Plugin.register :redmine_resource_planner do
 
   project_module :resource_planner do
     permission :view_resource_planner, { resource_planner: [:index] }, require: :member
+    permission :manage_resource_planner_assignments, { resource_planner: [:assign] }, require: :member
+    permission :manage_resource_planner_capacities, { resource_planner: [:update_capacity] }, require: :member
   end
 
   menu :project_menu,
